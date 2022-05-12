@@ -10,12 +10,13 @@ import SwiftUI
 import Combine
 import Vision
 
-class BlurViewModel: ObservableObject {
+class AppViewModel: ObservableObject {
     
     @Published var imageProcessorIsWorking = false
     @AppStorage("confidenceFacialDetection") var shouldUseHighConfidenceForAutomaticFacialDetection = false
     @AppStorage("faceCoveringMethod") var faceCoveringMethod: Int = 0
     private var faceProcessor: ImageProcessor
+    var unsupportedImageFormat = false
     var imageOrientation: UIImage.Orientation?
     var observers: [AnyCancellable] = []
     var sourceImg: UIImage? {
@@ -66,9 +67,13 @@ class BlurViewModel: ObservableObject {
     }
     
     func newImage(img: UIImage) {
-        guard let cgImg = img.cgImage else { return }
+        unsupportedImageFormat = false
+        guard let cgImg = img.cgImage else { unsupportedImageFormat = true; return }
         faceProcessor.originalImage = cgImg
         imageOrientation = img.imageOrientation
+        if faceProcessor.scaledImage == nil {
+            unsupportedImageFormat = true
+        }
     }
     
     func addFace(rect: CGRect, imageSize: CGSize) {

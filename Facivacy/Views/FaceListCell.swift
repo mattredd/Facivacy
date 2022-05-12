@@ -10,7 +10,7 @@ import SwiftUI
 
 struct FaceListCell: View {
     
-    @EnvironmentObject var blurModel: BlurViewModel
+    @EnvironmentObject var viewModel: AppViewModel
     @Environment(\.displayScale) var displayScale
     let face: ImageFace
     let cellSize = 80.0
@@ -18,8 +18,8 @@ struct FaceListCell: View {
     var body: some View {
         HStack {
             Spacer()
-            if let image = blurModel.image(for: face) {
-                Image(uiImage: UIImage(cgImage: image, scale: displayScale, orientation: blurModel.imageOrientation ?? .up))
+            if let image = viewModel.image(for: face) {
+                Image(uiImage: UIImage(cgImage: image, scale: displayScale, orientation: viewModel.imageOrientation ?? .up))
                     .resizable()
                     .cornerRadius(UIConstants.cornerRadius)
                     .frame(width: cellSize, height: cellSize)
@@ -30,7 +30,7 @@ struct FaceListCell: View {
             }
             Spacer()
             Button {
-                blurModel.toggleBlur(for: face)
+                viewModel.toggleBlur(for: face)
             } label: {
                 ZStack {
                     Text("Covered")

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MainView: View {
     
-    @StateObject var blurViewModel: BlurViewModel = BlurViewModel()
+    @StateObject var viewModel: AppViewModel = AppViewModel()
     @State private var manageFaces = false
     @State private var showFaceChooser = false
     @State private var imageSize: CGSize = .zero
@@ -25,10 +25,10 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             VStack {
-                if blurViewModel.processedImage != nil {
+                if viewModel.processedImage != nil {
                     ZStack {
-                        if let img = blurViewModel.processedImage {
-                            Image(uiImage: UIImage(cgImage: img, scale: displayScale, orientation: blurViewModel.imageOrientation ?? .up))
+                        if let img = viewModel.processedImage {
+                            Image(uiImage: UIImage(cgImage: img, scale: displayScale, orientation: viewModel.imageOrientation ?? .up))
                                 .resizable()
                                 .cornerRadius(UIConstants.largeCornerRadius)
                                 .shadow(radius: UIConstants.cornerRadius)
@@ -49,12 +49,12 @@ struct MainView: View {
                                                 }
                                             } blur: {
                                                 showFaceChooser = false
-                                                blurViewModel.addFace(rect: facePickerRect ?? .zero, imageSize: imageSize)
+                                                viewModel.addFace(rect: facePickerRect ?? .zero, imageSize: imageSize)
                                             }
                                         }
                                     })
                                 .gesture(facePickerTapGesture)
-                            if blurViewModel.imageProcessorIsWorking {
+                            if viewModel.imageProcessorIsWorking {
                                 ProgessCircularView()
                             }
                         }
@@ -64,10 +64,11 @@ struct MainView: View {
                 } else { placeholderView }
             }
             .toolbar {toolbarItems }
-            .sheet(isPresented: $manageFaces) { OptionsList(showNewPictureView: $showImagePicker, shoudUseHighConfidenceForFaceDetection: $blurViewModel.shouldUseHighConfidenceForAutomaticFacialDetection, faceCoveringMethod: $blurViewModel.faceCoveringMethod).environmentObject(blurViewModel).onDisappear(perform: self.blurViewModel.updateImage) }
+            .sheet(isPresented: $manageFaces) { OptionsList(showNewPictureView: $showImagePicker, shoudUseHighConfidenceForFaceDetection: $viewModel.shouldUseHighConfidenceForAutomaticFacialDetection, faceCoveringMethod: $viewModel.faceCoveringMethod).environmentObject(viewModel).onDisappear(perform: self.viewModel.updateImage) }
             .sheet(isPresented: $showImagePicker) {
-                ImagePickerView(show: $showImagePicker, image: $blurViewModel.sourceImg)
+                ImagePickerView(show: $showImagePicker, image: $viewModel.sourceImg)
             }
+            .alert("Unsupported Image Format", isPresented: $viewModel.unsupportedImageFormat, actions: {}, message: { Text("The photo you selected is not supported by this app.\n Please try another photo.")})
             .navigationBarTitle("Facivacy", displayMode: .inline)
         }
     }
@@ -96,15 +97,15 @@ struct MainView: View {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .popover(isPresented: $showShareSheet) {
-                    if let img = blurViewModel.imageForSharing()?.jpegData(compressionQuality: 0.8) {
+                    if let img = viewModel.imageForSharing()?.jpegData(compressionQuality: 0.8) {
                         ShareSheetView(showShareSheet: $showShareSheet, finalImage:  img)
                     }
                 }
-                Button(action: { blurViewModel.findAndDetectFaces() }) {
+                Button(action: { viewModel.findAndDetectFaces() }) {
                     Image(systemName: "wand.and.stars")
                 }
             }
-            .disabled(blurViewModel.sourceImg == nil)
+            .disabled(viewModel.sourceImg == nil)
         }
     }
     

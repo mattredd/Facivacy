@@ -10,7 +10,7 @@ import SwiftUI
 
 struct OptionsList: View {
     
-    @EnvironmentObject var blurViewModel: BlurViewModel
+    @EnvironmentObject var blurViewModel: AppViewModel
     @Environment(\.dismiss) var dismiss
     @Binding var showNewPictureView: Bool
     @Binding var shoudUseHighConfidenceForFaceDetection: Bool
